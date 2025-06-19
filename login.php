@@ -1,4 +1,29 @@
-<?php session_start(); ?>
+<?php 
+session_start(); 
+
+// Check if already logged in
+if (isset($_SESSION['logged']) && $_SESSION['logged'] === true) {
+    header("Location: admin.php");
+    exit();
+}
+
+$error_message = '';
+if (isset($_GET['error'])) {
+    switch ($_GET['error']) {
+        case 'empty_fields':
+            $error_message = 'Per favore inserisci username e password.';
+            break;
+        case 'invalid_credentials':
+            $error_message = 'Username o password non corretti.';
+            break;
+        case 'system_error':
+            $error_message = 'Errore di sistema. Riprova più tardi.';
+            break;
+        default:
+            $error_message = 'Errore sconosciuto.';
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -123,6 +148,17 @@
             font-weight: 400;
         }
 
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
             position: relative;
@@ -182,6 +218,10 @@
             position: relative;
             overflow: hidden;
             margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .submit-btn::before {
@@ -275,6 +315,25 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        .setup-link {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setup-link a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .setup-link a:hover {
+            color: #93c5fd;
         }
 
         @media (max-width: 768px) {
@@ -399,11 +458,18 @@
             <p class="login-subtitle">Gestione ristorante e prenotazioni</p>
         </div>
 
+        <?php if ($error_message): ?>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <?php echo htmlspecialchars($error_message); ?>
+            </div>
+        <?php endif; ?>
+
         <form method="POST" action="login_check.php" id="loginForm">
             <div class="form-group">
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" name="username" placeholder="Nome utente" required autocomplete="username">
+                    <input type="text" name="username" placeholder="Nome utente" required autocomplete="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                 </div>
             </div>
 
@@ -425,6 +491,13 @@
             <span>Connessione sicura e crittografata</span>
         </div>
 
+        <div class="setup-link">
+            <a href="setup_database.php">
+                <i class="fas fa-database"></i>
+                Setup Database (Prima installazione)
+            </a>
+        </div>
+
         <div class="back-link">
             <a href="index.php">
                 <i class="fas fa-arrow-left"></i>
@@ -440,6 +513,15 @@
             const inputs = document.querySelectorAll('input');
 
             form.addEventListener('submit', (e) => {
+                const username = form.username.value.trim();
+                const password = form.password.value;
+                
+                if (!username || !password) {
+                    e.preventDefault();
+                    alert('Per favore inserisci username e password.');
+                    return;
+                }
+                
                 loading.style.display = 'flex';
             });
 

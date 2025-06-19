@@ -316,6 +316,10 @@
             margin-top: 1rem;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .submit-btn::before {
@@ -632,9 +636,9 @@
                                 <option value="">Sceglierò al ristorante</option>
                                 <?php
                                 include 'connessione.php';
-                                $servizi = $conn->query("SELECT nome FROM servizi ORDER BY nome");
-                                if ($servizi && $servizi->num_rows > 0) {
-                                    while ($row = $servizi->fetch_assoc()) {
+                                $menu_query = $conn->query("SELECT nome FROM menu ORDER BY nome");
+                                if ($menu_query && $menu_query->num_rows > 0) {
+                                    while ($row = $menu_query->fetch_assoc()) {
                                         echo '<option value="' . htmlspecialchars($row['nome']) . '">' . htmlspecialchars($row['nome']) . '</option>';
                                     }
                                 }
